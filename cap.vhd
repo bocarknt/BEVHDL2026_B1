@@ -17,7 +17,7 @@ entity cap is
         data_valid    : out std_logic;
         data_compas   : out std_logic_vector(8 downto 0);
         out_1s        : out std_logic;
-        led           : out std_logic_vector(3 downto 0)
+        led           : out std_logic_vector(8 downto 0)
     );
 end entity cap;
 
@@ -195,22 +195,23 @@ begin
     ------------------------------------------------------------------
     -- Bloc G : Génération des LEDs (état courant uniquement)
     ------------------------------------------------------------------
-    G : process(ep)
-    begin
-        led <= "0000";
-
-        case ep is
-            when wait_in_pwm      => led <= "0001";
-            when compt            => led <= "0010";
-            when traitement       => led <= "0011";
-            when wait_start       => led <= "0100";
-            when wait_1s          => led <= "0101";
-            when others          => null;
-        end case;
-    end process G;
+--    G : process(ep)
+--    begin
+--        led <= "00000000";
+--
+--        case ep is
+--            when wait_in_pwm      => led <= "0001";
+--            when compt            => led <= "0010";
+--            when traitement       => led <= "0011";
+--            when wait_start       => led <= "0100";
+--            when wait_1s          => led <= "0101";
+--            when others          => null;
+--        end case;
+--    end process G;
 
     -- Sorties finales (chaque signal a un seul driver, ici concurrent)
     out_1s      <= tick_1s;
+	 led			 <= compas_reg;
     data_compas <= compas_reg;
     data_valid  <= valid_reg;
 
