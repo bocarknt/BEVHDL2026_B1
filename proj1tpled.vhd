@@ -10,6 +10,7 @@ entity proj1tpled is
     port (
         clk :in  STD_LOGIC;
         rst :in  STD_LOGIC;
+		  sel :in STD_LOGIC;
         led :out STD_LOGIC_VECTOR(3 downto 0)
     );
 end proj1tpled;
@@ -40,19 +41,23 @@ begin
     end process;
 	 
 	 process(clk, rst)
-		variable temp1 :integer range 0 to max;
+
 	 begin
 		if rst = '0' then
-            temp1 :=0;
+           
             d<= "1000";
 	  elsif rising_edge(clk) then
-		if (temp1=max)then
-			temp1:=0;
-			 d<= d(0) & d(3 downto 1) ;
-		  else
-                temp1 :=temp1 +1;		
+		if (clk1='1')then
+			if (sel='0')then
+				
+				d<= d(0) & d(3 downto 1) ;
+				
+			else
+            
+				d<=d(2 downto 0) & d(3);	 
 			
-		end if;
+				end if;
+			end if;
 		end if;
 	 
 	 end process;
