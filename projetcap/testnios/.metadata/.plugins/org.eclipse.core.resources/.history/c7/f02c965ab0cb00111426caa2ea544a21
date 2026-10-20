@@ -1,0 +1,48 @@
+#include <stdio.h>
+#include "system.h"
+#include "alt_types.h"
+#include "unistd.h" // Pour usleep
+
+// Définitions des adresses de base (basées sur votre fichier system.h)
+#define CAP_BASE_ADDR   CAP_0_BASE
+#define PWM_BASE_ADDR   PWM_BASE  // Assurez-vous que la macro correspond dans system.h
+
+int main() {
+    printf("Démarrage du programme de test PWM -> CAP !\n");
+
+    // Pointeurs pour le CAP
+    volatile alt_u32* const cap_ctrl   = (alt_u32*) CAP_BASE_ADDR;
+    volatile alt_u32* const cap_valeur = (alt_u32*) (CAP_BASE_ADDR + 4);
+
+    // Pointeurs pour le PWM (selon votre VHDL : adresses 00=freq, 01=duty, 10=control)
+    volatile alt_u32* const pwm_freq    = (alt_u32*) PWM_BASE_ADDR;
+    volatile alt_u32* const pwm_duty    = (alt_u32*) (PWM_BASE_ADDR + 4);
+    volatile alt_u32* const pwm_control = (alt_u32*) (PWM_BASE_ADDR + 8);
+
+    // 1. CONFIGURATION DU PWM
+    // Ajustez ces valeurs selon votre horloge (ex: horloge 50MHz)
+    // Exemple : Période à 50000 (fréquence du signal) et Duty à 25000 (50% de rapport cyclique)
+    *pwm_freq    = 50000;
+    *pwm_duty    = 25000;
+
+    // Activation du PWM : Bit 0 = enable (1), Bit 1 = start/run (1) -> Valeur 0x3
+    *pwm_control = 0x3;
+    printf("PWM configuré et démarré !\n");
+
+    // 2. CONFIGURATION DU CAP (Boussole)
+    // Bit 0 = 1 (mode continu), Bit 1 = 1 (start_stop)
+    *cap_ctrl = 0x3;
+
+    while(1) {
+        // 3. Lecture de la valeur mesurée par le CAP
+        alt_u32 valeur_boussole = *cap_valeur;
+
+        // 4. Affichage de la valeur
+        printf("Valeur lue du CAP : %lu\n", (unsigned long)valeur_boussole);
+
+        // Pause d'une demi-seconde
+        usleep(500000);
+    }
+
+    return 0;
+}

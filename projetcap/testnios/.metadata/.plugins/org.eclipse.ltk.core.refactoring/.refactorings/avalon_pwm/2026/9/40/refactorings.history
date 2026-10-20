@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;avalon_pwm/hello_world.c&apos; to &apos;hello_world.vhd&apos;" description="Rename resource &apos;hello_world.c&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="hello_world.c" name="hello_world.vhd" stamp="1790666616487" updateReferences="true"/>
+</session>

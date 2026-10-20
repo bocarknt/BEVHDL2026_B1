@@ -1,0 +1,35 @@
+#include <stdio.h>
+#include "system.h"
+#include "alt_types.h"
+#include "unistd.h"
+#include "io.h"
+
+int main() {
+    printf("=== Debut du programme PWM -> CAP ===\n");
+
+    // Définition des pointeurs en dehors de la boucle
+    volatile alt_u32* const cap_ctrl   = (alt_u32*) CAP_0_BASE;
+    volatile alt_u32* const cap_valeur = (alt_u32*) (CAP_0_BASE + 4);
+
+    // 1. Configuration du PWM (Fréquence et Rapport cyclique)
+    IOWR(PWM_BASE, 0, 50000);  // Période / Fréquence
+    IOWR(PWM_BASE, 1, 25000);  // Duty (50%)
+    IOWR(PWM_BASE, 2, 0x3);    // Activation PWM (Enable + Run)
+    printf("PWM active !\n");
+
+    // 2. Configuration du CAP en mode continu
+    *cap_ctrl = 0x3;
+    printf("CAP active en mode continu !\n");
+
+    while(1) {
+        // 3. Lecture directe de la valeur du CAP
+        alt_u32 valeur_boussole = *cap_valeur;
+
+        // Affichage de la valeur lue
+        printf("Valeur lue du CAP : %lu\n", (unsigned long)valeur_boussole);
+
+        usleep(500000); // Pause de 500ms
+    }
+
+    return 0;
+}

@@ -1,0 +1,64 @@
+#include <stdio.h>
+#include "system.h"
+#include "alt_types.h"
+#include "io.h"
+
+#ifndef SWITCH_BASE
+#define SWITCH_BASE 0x3020
+#endif
+
+#define CAP_BASE_ADDR CAP_0_BASE
+
+int main() {
+    // 1. Configuration initiale du PWM
+    IOWR(PWM_BASE, 0, 50000);
+    IOWR(PWM_BASE, 1, 25000);
+    IOWR(PWM_BASE, 2, 0x3);
+
+    int mode_precedent = -1;
+    int bouton_precedent = 0;
+
+    while(1) {
+        alt_u32 etat_switches = IORD(SWITCH_BASE, 0) & 0x1;
+        alt_u32 etat_bouton = IORD(BOUTON_BASE, 0) & 0x1;
+
+        // Gestion de base des modes
+        if (etat_switches == 1) {
+            if (mode_precedent != 1) {
+                IOWR(CAP_BASE_ADDR, 0, 0x3); // Mode Continu
+                mode_precedent = 1;
+            }
+        } else {
+            if (mode_precedent != 0) {
+                IOWR(CAP_BASE_ADDR, 0, 0x1); // Mode Monocoup
+                mode_precedent = 0;
+            }
+
+            // Si on appuie sur le bouton en mode monocoup
+            if (etat_bouton == 1 && bouton_precedent == 0) {
+                IOWR(LED_BASE, 0, 0x2);      // Allume la LED 1 pour témoin du bouton
+                IOWR(CAP_BASE_ADDR, 0, 0x5); // Start = 1
+
+                volatile int t = 100000;
+                while(t > 0) { t--; }
+
+                IOWR(CAP_BASE_ADDR, 0, 0x1); // Start = 0
+            } else if (etat_bouton == 0) {
+                IOWR(LED_BASE, 0, etat_switches); // LED 0 = état du switch
+            }
+        }
+
+        // Si on est en mode continu, la LED 0 suit le switch
+        if (etat_switches == 1) {
+            IOWR(LED_BASE, 0, 0x1);
+        }
+
+        bouton_precedent = etat_bouton;
+
+        // Petite attente
+        volatile int temps = 500000;
+        while(temps > 0) { temps--; }
+    }
+
+    return 0;
+}

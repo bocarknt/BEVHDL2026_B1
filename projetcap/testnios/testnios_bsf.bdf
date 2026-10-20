@@ -1,0 +1,125 @@
+/*
+WARNING: Do NOT edit the input and output ports in this file in a text
+editor if you plan to continue editing the block that represents it in
+the Block Editor! File corruption is VERY likely to occur.
+*/
+/*
+Copyright (C) 2018  Intel Corporation. All rights reserved.
+Your use of Intel Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Intel Program License 
+Subscription Agreement, the Intel Quartus Prime License Agreement,
+the Intel FPGA IP License Agreement, or other applicable license
+agreement, including, without limitation, that your use is for
+the sole purpose of programming logic devices manufactured by
+Intel and sold by Intel or its authorized distributors.  Please
+refer to the applicable agreement for further details.
+*/
+(header "graphic" (version "1.4"))
+(symbol
+	(rect 240 104 720 424)
+	(text "testnios" (rect 218 -1 272 15)(font "Arial" (font_size 10)))
+	(text "inst" (rect 8 304 25 316)(font "Arial" ))
+	(port
+		(pt 0 72)
+		(input)
+		(text "bouton_external_connection_export[1..0]" (rect 0 0 233 14)(font "Arial" (font_size 8)))
+		(text "bouton_external_connection_export[1..0]" (rect 4 61 237 75)(font "Arial" (font_size 8)))
+		(line (pt 0 72)(pt 208 72)(line_width 3))
+	)
+	(port
+		(pt 0 112)
+		(input)
+		(text "cap_0_conduit_end_export" (rect 0 0 155 14)(font "Arial" (font_size 8)))
+		(text "cap_0_conduit_end_export" (rect 4 101 159 115)(font "Arial" (font_size 8)))
+		(line (pt 0 112)(pt 208 112))
+	)
+	(port
+		(pt 0 168)
+		(input)
+		(text "clk_clk" (rect 0 0 37 14)(font "Arial" (font_size 8)))
+		(text "clk_clk" (rect 4 157 41 171)(font "Arial" (font_size 8)))
+		(line (pt 0 168)(pt 208 168))
+	)
+	(port
+		(pt 0 288)
+		(input)
+		(text "reset_reset_n" (rect 0 0 80 14)(font "Arial" (font_size 8)))
+		(text "reset_reset_n" (rect 4 277 84 291)(font "Arial" (font_size 8)))
+		(line (pt 0 288)(pt 208 288))
+	)
+	(port
+		(pt 0 128)
+		(output)
+		(text "cap_0_conduit_end_cap_led[7..0]" (rect 0 0 192 14)(font "Arial" (font_size 8)))
+		(text "cap_0_conduit_end_cap_led[7..0]" (rect 4 117 196 131)(font "Arial" (font_size 8)))
+		(line (pt 0 128)(pt 208 128)(line_width 3))
+	)
+	(port
+		(pt 0 208)
+		(output)
+		(text "led_external_connection_export[7..0]" (rect 0 0 211 14)(font "Arial" (font_size 8)))
+		(text "led_external_connection_export[7..0]" (rect 4 197 215 211)(font "Arial" (font_size 8)))
+		(line (pt 0 208)(pt 208 208)(line_width 3))
+	)
+	(port
+		(pt 0 248)
+		(output)
+		(text "pwm_conduit_end_export" (rect 0 0 148 14)(font "Arial" (font_size 8)))
+		(text "pwm_conduit_end_export" (rect 4 237 152 251)(font "Arial" (font_size 8)))
+		(line (pt 0 248)(pt 208 248))
+	)
+	(drawing
+		(text "bouton_external_connection" (rect 47 43 229 58)(font "Arial" (color 128 0 0)(font_size 9)))
+		(text "export" (rect 213 67 243 79)(font "Arial" (color 0 0 0)))
+		(text "cap_0_conduit_end" (rect 96 83 224 98)(font "Arial" (color 128 0 0)(font_size 9)))
+		(text "export" (rect 213 107 243 119)(font "Arial" (color 0 0 0)))
+		(text "cap_led" (rect 213 123 250 135)(font "Arial" (color 0 0 0)))
+		(text "clk" (rect 193 139 210 154)(font "Arial" (color 128 0 0)(font_size 9)))
+		(text "clk" (rect 213 163 227 175)(font "Arial" (color 0 0 0)))
+		(text "led_external_connection" (rect 69 179 227 194)(font "Arial" (color 128 0 0)(font_size 9)))
+		(text "export" (rect 213 203 243 215)(font "Arial" (color 0 0 0)))
+		(text "pwm_conduit_end" (rect 103 219 223 234)(font "Arial" (color 128 0 0)(font_size 9)))
+		(text "export" (rect 213 243 243 255)(font "Arial" (color 0 0 0)))
+		(text "reset" (rect 179 259 212 274)(font "Arial" (color 128 0 0)(font_size 9)))
+		(text "reset_n" (rect 213 283 249 295)(font "Arial" (color 0 0 0)))
+		(text " testnios " (rect 444 304 490 316)(font "Arial" ))
+		(line (pt 208 32)(pt 272 32))
+		(line (pt 272 32)(pt 272 304))
+		(line (pt 208 304)(pt 272 304))
+		(line (pt 208 32)(pt 208 304))
+		(line (pt 209 52)(pt 209 76))
+		(line (pt 210 52)(pt 210 76))
+		(line (pt 209 92)(pt 209 132))
+		(line (pt 210 92)(pt 210 132))
+		(line (pt 209 148)(pt 209 172))
+		(line (pt 210 148)(pt 210 172))
+		(line (pt 209 188)(pt 209 212))
+		(line (pt 210 188)(pt 210 212))
+		(line (pt 209 228)(pt 209 252))
+		(line (pt 210 228)(pt 210 252))
+		(line (pt 209 268)(pt 209 292))
+		(line (pt 210 268)(pt 210 292))
+		(line (pt 0 0)(pt 480 0))
+		(line (pt 480 0)(pt 480 320))
+		(line (pt 0 320)(pt 480 320))
+		(line (pt 0 0)(pt 0 320))
+	)
+)
+(connector
+	(text "signal_loop" (rect 202 336 257 353)(font "Intel Clear" ))
+	(pt 240 352)
+	(pt 192 352)
+)
+(connector
+	(text "signal_loop" (rect 202 200 257 217)(font "Intel Clear" ))
+	(pt 240 216)
+	(pt 192 216)
+)
+(connector
+	(pt 192 216)
+	(pt 192 352)
+)

@@ -1,0 +1,71 @@
+#include <stdio.h>
+#include "system.h"
+#include "alt_types.h"
+#include "io.h"
+
+#define CAP_BASE_ADDR CAP_0_BASE
+
+int main() {
+    printf("=== Systeme Boussole : Continu vs Monocoup (avec Impulsion) ===\n");
+
+    // 1. Configuration initiale du PWM
+    IOWR(PWM_BASE, 0, 50000);
+    IOWR(PWM_BASE, 1, 25000);
+    IOWR(PWM_BASE, 2, 0x3);
+    printf("PWM configure et demarre !\n");
+
+    int mode_precedent = -1;
+    int bouton_precedent = 0;
+
+    while(1) {
+        // 2. Lecture du switch pour choisir le mode (Switch 0)
+        alt_u32 etat_switches = IORD(SWITCH_BASE, 0) & 0x1;
+
+        // Lecture du bouton pour déclencher le start en monocoup (Bouton 0)
+        alt_u32 etat_bouton = IORD(BOUTON_BASE, 0) & 0x1;
+
+        if (etat_switches == 1) {
+            // --- MODE CONTINU ---
+            if (mode_precedent != 1) {
+                // raz_n = 1, continu = 1, start_stop = 0 -> Valeur = 0x3
+                IOWR(CAP_BASE_ADDR, 0, 0x3);
+                printf("\n[MODE] Switch ON -> Mode CONTINU active\n");
+                mode_precedent = 1;
+            }
+        } else {
+            // --- MODE MONOCOUP ---
+            if (mode_precedent != 0) {
+                // raz_n = 1, continu = 0, start_stop = 0 -> Valeur = 0x1
+                IOWR(CAP_BASE_ADDR, 0, 0x1);
+                printf("\n[MODE] Switch OFF -> Mode MONOCOUP active (Appuyez sur le bouton pour mesurer)\n");
+                mode_precedent = 0;
+            }
+
+            // Détection d'un appui sur le bouton (Front montant : 0 -> 1)
+            if (etat_bouton == 1 && bouton_precedent == 0) {
+                printf("\n[ACTION] Impulsion START envoyee !\n");
+
+                // Étape A : Envoyer le start (raz_n = 1, continu = 0, start_stop = 1 -> 0x5)
+                IOWR(CAP_BASE_ADDR, 0, 0x5);
+
+                // Petite pause logicielle pour que l'automate voie l'impulsion à 1
+                volatile int t = 100000;
+                while(t > 0) { t--; }
+
+                // Étape B : Redescendre le start à 0 (raz_n = 1, continu = 0, start_stop = 0 -> 0x1)
+                IOWR(CAP_BASE_ADDR, 0, 0x1);
+            }
+        }
+        bouton_precedent = etat_bouton;
+
+        // 3. Lecture de la valeur mesurée de la boussole
+        alt_u32 valeur_boussole = IORD(CAP_BASE_ADDR, 1);
+        printf("Valeur lue : %lu\n", (unsigned long)valeur_boussole);
+
+        // Petite attente pour stabiliser l'affichage dans la console
+        volatile int temps = 500000;
+        while(temps > 0) { temps--; }
+    }
+
+    return 0;
+}

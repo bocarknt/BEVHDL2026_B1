@@ -1,0 +1,13 @@
+	component testnios is
+		port (
+			bouton_external_connection_export : in  std_logic_vector(1 downto 0) := (others => 'X'); -- export
+			cap_0_conduit_end_export          : in  std_logic                    := 'X';             -- export
+			cap_0_conduit_end_cap_led         : out std_logic_vector(7 downto 0);                    -- cap_led
+			clk_clk                           : in  std_logic                    := 'X';             -- clk
+			led_external_connection_export    : out std_logic_vector(7 downto 0);                    -- export
+			pwm_conduit_end_export            : out std_logic;                                       -- export
+			reset_reset_n                     : in  std_logic                    := 'X';             -- reset_n
+			switch_external_connection_export : in  std_logic_vector(3 downto 0) := (others => 'X')  -- export
+		);
+	end component testnios;
+

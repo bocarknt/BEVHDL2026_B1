@@ -1,0 +1,33 @@
+#include <stdio.h>
+#include "system.h"
+#include "alt_types.h"
+#include "unistd.h"
+#include "io.h"
+
+#define CAP_BASE_ADDR CAP_0_BASE
+
+int main() {
+    printf("=== Démarrage du système PWM -> Boussole (CAP) ===\n");
+
+    // 1. Configuration initiale du PWM (une seule fois)
+    IOWR(PWM_BASE, 0, 50000);  // Fréquence / Période
+    IOWR(PWM_BASE, 1, 25000);  // Rapport cyclique à 50%
+    IOWR(PWM_BASE, 2, 0x3);    // Activation du PWM (Enable + Run)
+    printf("PWM configuré et démarré !\n");
+
+    // 2. Pointeur vers le registre de données de la boussole (+4 octets)
+    volatile alt_u32* const cap_valeur = (alt_u32*) (CAP_BASE_ADDR + 4);
+
+    while(1) {
+        // 3. Lecture de la valeur mesurée
+        alt_u32 valeur_boussole = *cap_valeur;
+
+        // 4. Affichage dans la console Nios II
+        printf("Valeur lue de la boussole : %lu\n", (unsigned long)valeur_boussole);
+
+        // Pause d'une demi-seconde
+        usleep(500000);
+    }
+
+    return 0;
+}

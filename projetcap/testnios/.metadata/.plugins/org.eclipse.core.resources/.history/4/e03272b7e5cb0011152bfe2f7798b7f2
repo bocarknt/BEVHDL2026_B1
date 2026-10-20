@@ -1,0 +1,43 @@
+#include <stdio.h>
+#include "system.h"
+#include "alt_types.h"
+#include "unistd.h"
+#include "io.h"
+
+#define CAP_BASE_ADDR CAP_0_BASE
+
+int main() {
+    printf("=== Test des modes de la boussole (CAP) ===\n");
+
+    // 1. Configuration initiale du PWM
+    IOWR(PWM_BASE, 0, 50000);
+    IOWR(PWM_BASE, 1, 25000);
+    IOWR(PWM_BASE, 2, 0x3);
+    printf("PWM configuré et démarré !\n");
+
+    int compteur_cycle = 0;
+
+    while(1) {
+        // Toutes les 10 boucles (5 secondes), on alterne le mode
+        if (compteur_cycle % 10 == 0) {
+            if ((compteur_cycle / 10) % 2 == 0) {
+                // Mode Continu (b1 = 1, raz_n = 1 -> 0x3)
+                IOWR(CAP_BASE_ADDR, 0, 0x3);
+                printf("\n--- Passage en MODE CONTINU ---\n");
+            } else {
+                // Mode Monocoup avec impulsion de start (b2 = 1, b1 = 0, raz_n = 1 -> 0x5)
+                IOWR(CAP_BASE_ADDR, 0, 0x5);
+                printf("\n--- Passage en MODE MONOCOUP (Start) ---\n");
+            }
+        }
+
+        // 2. Lecture de la valeur mesurée avec IORD à l'offset 1 (qui correspond à l'adresse +4)
+        alt_u32 valeur_boussole = IORD(CAP_BASE_ADDR, 1);
+        printf("Valeur lue : %lu\n", (unsigned long)valeur_boussole);
+
+        compteur_cycle++;
+        usleep(500000); // Pause de 0.5s
+    }
+
+    return 0;
+}

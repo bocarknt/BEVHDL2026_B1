@@ -1,0 +1,67 @@
+#include <stdio.h>
+#include "system.h"
+#include "alt_types.h"
+#include "io.h"
+
+#define CAP_BASE_ADDR CAP_0_BASE
+
+int main() {
+    printf("=== SYSTEME BOUSSOLE : FINAL ===\n");
+
+    // Configuration initiale du PWM
+    IOWR(PWM_BASE, 0, 50000);
+    IOWR(PWM_BASE, 1, 25000);
+    IOWR(PWM_BASE, 2, 0x3);
+
+    int mode_precedent = -1;
+    int bouton_precedent = 0;
+
+    while(1) {
+        alt_u32 etat_switches = IORD(SWITCH_BASE, 0) & 0x1;
+        alt_u32 etat_bouton = IORD(BOUTON_BASE, 0) & 0x1;
+
+        if (etat_switches == 1) {
+            // --- MODE CONTINU ---
+            if (mode_precedent != 1) {
+                IOWR(CAP_BASE_ADDR, 0, 0x3);
+                printf("\n[MODE] Continu active\n");
+                mode_precedent = 1;
+            }
+            alt_u32 valeur_boussole = IORD(CAP_BASE_ADDR, 1);
+            printf("Cap Continu : %lu\n", (unsigned long)valeur_boussole);
+
+        } else {
+            // --- MODE MONOCOUP ---
+            if (mode_precedent != 0) {
+                IOWR(CAP_BASE_ADDR, 0, 0x1);
+                printf("\n[MODE] Monocoup active (En attente du bouton)\n");
+                mode_precedent = 0;
+            }
+
+            // Détection de l'appui sur le bouton
+            if (etat_bouton == 1 && bouton_precedent == 0) {
+                printf("\n[ACTION] Appui bouton -> Impulsion START (0x5)\n");
+
+                IOWR(CAP_BASE_ADDR, 0, 0x5);
+
+                volatile int t = 500000;
+                while(t > 0) { t--; }
+
+                IOWR(CAP_BASE_ADDR, 0, 0x1);
+                printf("[ACTION] Fin d'impulsion START (0x1)\n");
+
+                volatile int wait_mesure = 500000;
+                while(wait_mesure > 0) { wait_mesure--; }
+
+                alt_u32 valeur_unique = IORD(CAP_BASE_ADDR, 1);
+                printf("--> Valeur de la mesure unique : %lu\n", (unsigned long)valeur_unique);
+            }
+        }
+        bouton_precedent = etat_bouton;
+
+        volatile int temps = 200000;
+        while(temps > 0) { temps--; }
+    }
+
+    return 0;
+}

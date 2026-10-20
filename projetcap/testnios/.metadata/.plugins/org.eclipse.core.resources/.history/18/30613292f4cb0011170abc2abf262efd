@@ -1,0 +1,51 @@
+#include <stdio.h>
+#include "system.h"
+#include "alt_types.h"
+#include "io.h"
+
+#define CAP_BASE_ADDR CAP_0_BASE
+
+int main() {
+    printf("=== Test du contrôle manuel de la boussole (CAP) ===\n");
+
+    // 1. Configuration initiale du PWM
+    IOWR(PWM_BASE, 0, 50000);
+    IOWR(PWM_BASE, 1, 25000);
+    IOWR(PWM_BASE, 2, 0x3);
+    printf("PWM configuré et démarré !\n");
+
+    int mode_precedent = -1;
+
+    while(1) {
+        // 2. On lit l'état du switch (supposons que votre PIO des switches s'appelle SWITCH_BASE)
+        // Si vous n'avez pas de PIO switch, vous pouvez remplacer par une variable ou un bouton
+        // alt_u32 etat_switch = IORD(SWITCH_BASE, 0) & 0x1;
+
+        // Pour l'instant, testons avec un simple choix ou l'adresse du CAP
+        // Mettons par exemple le mode Continu par défaut :
+        int mode_voulu = 1; // 1 pour continu, 0 pour monocoup
+
+        if (mode_voulu != mode_precedent) {
+            if (mode_voulu == 1) {
+                // Mode Continu (0x3)
+                IOWR(CAP_BASE_ADDR, 0, 0x3);
+                printf("\n--- Mode ACTIF : CONTINU ---\n");
+            } else {
+                // Mode Monocoup (0x5)
+                IOWR(CAP_BASE_ADDR, 0, 0x5);
+                printf("\n--- Mode ACTIF : MONOCOUP ---\n");
+            }
+            mode_precedent = mode_voulu;
+        }
+
+        // 3. Lecture de la valeur mesurée
+        alt_u32 valeur_boussole = IORD(CAP_BASE_ADDR, 1);
+        printf("Valeur lue : %lu\n", (unsigned long)valeur_boussole);
+
+        // Petite attente logicielle pour ne pas saturer la console
+        volatile int temps = 2000000;
+        while(temps > 0) { temps--; }
+    }
+
+    return 0;
+}

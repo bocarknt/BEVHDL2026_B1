@@ -1,0 +1,36 @@
+#include <stdio.h>
+#include "system.h"
+#include "alt_types.h"
+#include "unistd.h"
+#include "io.h"
+
+#define CAP_BASE_ADDR CAP_0_BASE
+
+int main() {
+    printf("=== Démarrage du système PWM -> Boussole (CAP) ===\n");
+
+    // 1. Initialisation des pointeurs vers les registres du CAP
+    volatile alt_u32* const cap_ctrl   = (alt_u32*) CAP_BASE_ADDR;
+    volatile alt_u32* const cap_valeur = (alt_u32*) (CAP_BASE_ADDR + 4);
+
+    while(1) {
+        // 2. Configuration et activation du PWM à chaque cycle (ou initialisation robuste)
+        IOWR(PWM_BASE, 0, 50000);  // Fréquence / Période
+        IOWR(PWM_BASE, 1, 25000);  // Rapport cyclique à 50%
+        IOWR(PWM_BASE, 2, 0x3);    // Activation du PWM (Enable + Run)
+
+        // 3. Activation du CAP en mode continu
+        *cap_ctrl = 0x3;
+
+        // 4. Lecture de la valeur mesurée par la boussole
+        alt_u32 valeur_boussole = *cap_valeur;
+
+        // 5. Affichage de la valeur dans la console
+        printf("Valeur lue de la boussole : %lu\n", (unsigned long)valeur_boussole);
+
+        // Pause d'une demi-seconde
+        usleep(500000);
+    }
+
+    return 0;
+}

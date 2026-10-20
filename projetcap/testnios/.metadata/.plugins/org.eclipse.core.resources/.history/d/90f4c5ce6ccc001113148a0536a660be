@@ -1,0 +1,86 @@
+#include <stdio.h>
+#include "system.h"
+#include "alt_types.h"
+#include "io.h"
+
+#define CAP_BASE_ADDR CAP_0_BASE
+
+int main() {
+    // Initialisation du PWM de la boussole
+    IOWR(PWM_BASE, 0, 50000);
+    IOWR(PWM_BASE, 1, 25000);
+    IOWR(PWM_BASE, 2, 0x3);
+
+    printf("========================================\n");
+    printf("   SYSTEME DE NAVIGATION BOUSSOLE FPGA  \n");
+    printf("========================================\n");
+
+    int mode_precedent = -1;
+    int bouton_precedent = 0;
+
+    while(1) {
+        // Lecture de l'interrupteur (Switch 0)
+        alt_u32 etat_switches = IORD(0x00003020, 0) & 0x1;
+
+        // Lecture du bouton KEY1 (bit 1 du PIO bouton -> masque 0x2)
+        alt_u32 etat_bouton   = (IORD(0x00003030, 0) & 0x2) ? 1 : 0;
+
+        if (etat_switches == 1) {
+            // --- MODE CONTINU ---
+            if (mode_precedent != 1) {
+                // b1 = 1 (continu), b0 = 1 (raz_n), b2 = 0 -> 0x3
+                IOWR(CAP_BASE_ADDR, 0, 0x3);
+                printf("\n[MODE] -> Continu active (Flux automatique)\n");
+                mode_precedent = 1;
+            }
+
+            // Lecture du registre Compas (Offset 1)
+            alt_u32 reg_compas = IORD(CAP_BASE_ADDR, 1);
+            int data_valid = (reg_compas >> 9) & 0x1;     // Bit 9 : valid
+            int cap_val    = reg_compas & 0x1FF;          // Bits 8..0 : valeur du cap
+
+            printf("[Continu] Valid: %d | Cap mesure : %d degres\n", data_valid, cap_val);
+
+            // Pause pour ralentir le flux en mode continu (ajustable)
+            for(volatile int t = 2000000; t > 0; t--);
+
+        } else {
+            // --- MODE MONOCOUP ---
+            if (mode_precedent != 0) {
+                // b1 = 0 (monocoup), b0 = 1 (raz_n), b2 = 0 -> 0x1
+                IOWR(CAP_BASE_ADDR, 0, 0x1);
+                printf("\n[MODE] -> Monocoup active (En attente d'un appui sur KEY1)\n");
+                mode_precedent = 0;
+            }
+
+            // Détection de l'appui sur KEY1 (Front montant)
+            if (etat_bouton == 1 && bouton_precedent == 0) {
+                printf("\n[ACTION] Appui KEY1 detecte -> Lancement de la mesure unique...\n");
+
+                // Envoi du Start : b2 = 1, b1 = 0, b0 = 1 -> 0x5
+                IOWR(CAP_BASE_ADDR, 0, 0x5);
+
+                // Maintien de l'impulsion start
+                for(volatile int t = 500000; t > 0; t--);
+
+                // Relâchement du Start : b2 = 0, b1 = 0, b0 = 1 -> 0x1
+                IOWR(CAP_BASE_ADDR, 0, 0x1);
+
+                // Attente de la fin du calcul par l'automate VHDL
+                for(volatile int wait = 1000000; wait > 0; wait--);
+
+                // Lecture du résultat unique
+                alt_u32 reg_compas = IORD(CAP_BASE_ADDR, 1);
+                int data_valid = (reg_compas >> 9) & 0x1;
+                int cap_val    = reg_compas & 0x1FF;
+
+                printf("--> [Monocoup] Succes ! Valid: %d | Cap unique : %d degres\n", data_valid, cap_val);
+            }
+        }
+        bouton_precedent = etat_bouton;
+
+        // Petite pause générale de stabilité de la boucle
+        for(volatile int temps = 100000; temps > 0; temps--);
+    }
+    return 0;
+}

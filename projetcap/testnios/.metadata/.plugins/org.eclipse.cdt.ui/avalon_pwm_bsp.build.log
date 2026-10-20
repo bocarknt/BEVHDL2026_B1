@@ -1,0 +1,6 @@
+08:44:20 **** Clean-only build of configuration Nios II for project avalon_pwm_bsp ****
+make clean 
+[BSP clean complete]
+
+08:44:21 Build Finished (took 1s.307ms)
+

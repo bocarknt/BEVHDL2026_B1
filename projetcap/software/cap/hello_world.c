@@ -1,0 +1,28 @@
+#include <stdio.h>
+#include "system.h"
+#include "alt_types.h"
+#include "unistd.h" // Pour usleep
+
+// Définition de l'adresse de base du composant (à adapter selon votre system.h si besoin)
+#define CAP_BASE_ADDR CAP_0_BASE
+
+// Pointeur vers les registres du composant
+// En supposant que le registre de données/contrôle est à l'offset 0
+volatile alt_u32* const cap_reg = (alt_u32*) CAP_BASE_ADDR;
+
+int main() {
+    printf("Démarrage du programme de test de la boussole !\n");
+
+    while(1) {
+        // Lecture de la valeur provenant de la boussole
+        alt_u32 valeur_boussole = *cap_reg;
+
+        // Affichage de la valeur dans la console Nios II (via JTAG UART)
+        printf("Valeur lue de la boussole : %lu\n", (unsigned long)valeur_boussole);
+
+        // Petite pause d'une demi-seconde
+        usleep(500000);
+    }
+
+    return 0;
+}

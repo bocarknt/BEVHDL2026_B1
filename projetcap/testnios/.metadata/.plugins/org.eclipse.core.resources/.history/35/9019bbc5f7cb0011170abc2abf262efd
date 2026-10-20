@@ -1,0 +1,49 @@
+#include <stdio.h>
+#include "system.h"
+#include "alt_types.h"
+#include "io.h"
+
+#define CAP_BASE_ADDR CAP_0_BASE
+
+int main() {
+    printf("=== Controle de la boussole par Switch Materiel ===\n");
+
+    // 1. Configuration initiale du PWM
+    IOWR(PWM_BASE, 0, 50000);
+    IOWR(PWM_BASE, 1, 25000);
+    IOWR(PWM_BASE, 2, 0x3);
+    printf("PWM configure et demarre !\n");
+
+    int mode_actuel = -1;
+
+    while(1) {
+        // 2. Lecture de l'etat physique du switch (assurez-vous d'avoir un PIO nomme SWITCH_BASE dans votre system.h)
+        // Si votre PIO s'appelle autrement (ex: BUTTON_BASE), remplacez le nom.
+        // Ici, on lit le premier switch (bit 0 & 1)
+        alt_u32 etat_switch = IORD(SWITCH_BASE, 0) & 0x1;
+
+        // 3. Application du mode selon la position du switch physique
+        if (etat_switch != mode_actuel) {
+            if (etat_switch == 1) {
+                // Switch ON -> Mode Continu (0x3)
+                IOWR(CAP_BASE_ADDR, 0, 0x3);
+                printf("\n[MATERIEL] Switch ON -> Mode CONTINU active\n");
+            } else {
+                // Switch OFF -> Mode Monocoup (0x5)
+                IOWR(CAP_BASE_ADDR, 0, 0x5);
+                printf("\n[MATERIEL] Switch OFF -> Mode MONOCOUP active\n");
+            }
+            mode_actuel = etat_switch;
+        }
+
+        // 4. Lecture de la valeur de la boussole
+        alt_u32 valeur_boussole = IORD(CAP_BASE_ADDR, 1);
+        printf("Valeur lue : %lu\n", (unsigned long)valeur_boussole);
+
+        // Petite attente pour stabiliser l'affichage
+        volatile int temps = 1000000;
+        while(temps > 0) { temps--; }
+    }
+
+    return 0;
+}

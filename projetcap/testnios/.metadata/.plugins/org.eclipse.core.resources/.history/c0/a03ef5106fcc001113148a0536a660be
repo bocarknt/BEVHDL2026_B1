@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include "system.h"
+#include "alt_types.h"
+#include "io.h"
+
+#define CAP_BASE_ADDR CAP_0_BASE
+
+int main() {
+    IOWR(PWM_BASE, 0, 50000);
+    IOWR(PWM_BASE, 1, 25000);
+    IOWR(PWM_BASE, 2, 0x3);
+
+    int mode_precedent = -1;
+    int bouton_precedent = 0;
+
+    while(1) {
+        alt_u32 etat_switches = IORD(0x00003020, 0) & 0x1;
+        alt_u32 etat_bouton = (IORD(0x00003030, 0) & 0x2) ? 1 :0;
+
+        if (etat_switches ==1) {
+            // MODE CONTINU
+            if (mode_precedent !=1) {
+                IOWR(CAP_BASE_ADDR, 0, 0x3);
+                mode_precedent =1;
+            }
+
+            alt_u32 reg_compas = IORD(CAP_BASE_ADDR, 1);
+            int valid =(reg_compas >>9) &0x1;
+            int cap = reg_compas & 0x1FF;
+
+            // Affichage mode continu
+            printf("Cont Cap:%d\n", valid, cap);
+
+            for(volatile int t=2000000; t>0; t--);
+
+        } else {
+            // MODE MONO
+            if (mode_precedent != 0) {
+                IOWR(CAP_BASE_ADDR, 0, 0x1);
+                mode_precedent =0;
+            }
+
+            if (etat_bouton == 1 && bouton_precedent == 0) {
+                IOWR(CAP_BASE_ADDR, 0, 0x5);
+
+                for(volatile int t=500000; t > 0; t--);
+
+                IOWR(CAP_BASE_ADDR, 0, 0x1);
+
+                for(volatile int wait =1000000; wait > 0; wait--);
+
+                alt_u32 reg_compas =IORD(CAP_BASE_ADDR, 1);
+                int valid = (reg_compas >>9)&0x1;
+                int cap = reg_compas &0x1FF;
+
+                // Affichage mode mono
+                printf("Mono Cap:%d\n", valid, cap);
+            }
+        }
+        bouton_precedent=etat_bouton;
+
+        for(volatile int temps=100000; temps>0; temps--);
+    }
+    return 0;
+}

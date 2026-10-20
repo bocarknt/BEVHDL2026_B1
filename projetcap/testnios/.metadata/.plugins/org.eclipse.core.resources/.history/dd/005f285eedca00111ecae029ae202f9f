@@ -1,0 +1,31 @@
+#include <stdio.h>
+#include "system.h"
+#include "alt_types.h"
+#include "unistd.h" // Pour usleep
+
+// Définition de l'adresse de base du composant
+#define CAP_BASE_ADDR CAP_0_BASE
+
+int main() {
+    printf("Démarrage du programme de test de la boussole !\n");
+
+    // Pointeur vers les registres du composant
+    // volatile alt_u32* const cap_reg = (alt_u32*) CAP_BASE_ADDR;
+
+    // -> On pointe vers l'adresse 1 (offset de +1 sur un pointeur alt_u32, soit +4 octets)
+    volatile alt_u32* const cap_reg = (alt_u32*) CAP_BASE_ADDR;
+    volatile alt_u32* const cap_valeur = (alt_u32*) (CAP_BASE_ADDR + 4);
+
+    while(1) {
+        // Lecture de la valeur provenant de la boussole à l'adresse 1
+        alt_u32 valeur_boussole = *cap_valeur;
+
+        // Affichage de la valeur dans la console Nios II
+        printf("Valeur lue de la boussole : %lu\n", (unsigned long)valeur_boussole);
+
+        // Petite pause d'une demi-seconde
+        usleep(500000);
+    }
+
+    return 0;
+}

@@ -1,0 +1,47 @@
+#include <stdio.h>
+#include "system.h"
+#include "alt_types.h"
+#include "io.h"
+
+#define CAP_BASE_ADDR CAP_0_BASE
+
+// Petite fonction de délai logiciel pour contourner usleep
+void attente_logicielle(volatile int temps) {
+    while(temps > 0) {
+        temps--;
+    }
+}
+
+int main() {
+    printf("=== Test des modes de la boussole (CAP) ===\n");
+
+    // 1. Configuration initiale du PWM
+    IOWR(PWM_BASE, 0, 50000);
+    IOWR(PWM_BASE, 1, 25000);
+    IOWR(PWM_BASE, 2, 0x3);
+    printf("PWM configuré et démarré !\n");
+
+    int compteur_cycle = 0;
+
+    while(1) {
+        // Toutes les 10 boucles, on alterne le mode
+        if (compteur_cycle % 10 == 0) {
+            if ((compteur_cycle / 10) % 2 == 0) {
+                IOWR(CAP_BASE_ADDR, 0, 0x3);
+                printf("\n--- Passage en MODE CONTINU ---\n");
+            } else {
+                IOWR(CAP_BASE_ADDR, 0, 0x5);
+                printf("\n--- Passage en MODE MONOCOUP (Start) ---\n");
+            }
+        }
+
+        // 2. Lecture de la valeur mesurée
+        alt_u32 valeur_boussole = IORD(CAP_BASE_ADDR, 1);
+        printf("Valeur lue : %lu (Cycle: %d)\n", (unsigned long)valeur_boussole, compteur_cycle);
+
+        compteur_cycle++;
+        attente_logicielle(2000000); // Remplacement de usleep par une attente logicielle
+    }
+
+    return 0;
+}
